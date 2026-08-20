@@ -41,10 +41,10 @@
             border-color: #005BAC;
         }
     </style>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-20">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
-    <header class="bg-mgBlue text-white shadow-md sticky top-0 z-50">
+    <!-- header 영역 sticky 해제 (모바일 사용성 개선) -->
+    <header class="bg-mgBlue text-white shadow-md z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
@@ -56,16 +56,41 @@
                     <input type="number" id="globalSalary" value="50000000" class="w-32 rounded bg-white/20 border-white/30 text-white pl-2 pr-8 py-1 text-right focus:outline-none focus:ring-1 focus:ring-white">
                     <span class="absolute right-2 top-1.5 text-xs text-white/80">원</span>
                 </div>
+                <!-- 저장 및 불러오기 버튼 추가 -->
+                <div class="flex gap-2 ml-4 border-l border-white/30 pl-4">
+                    <button onclick="savePortfolio()" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors flex items-center gap-1" title="포트폴리오 저장">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                        저장
+                    </button>
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors flex items-center gap-1" title="포트폴리오 불러오기">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        불러오기
+                    </button>
+                    <input type="file" id="fileInput" class="hidden" accept=".json" onchange="loadPortfolio(event)">
+                </div>
             </div>
         </div>
     </header>
     
-    <!-- 모바일용 연봉 입력 (헤더 아래) -->
-    <div class="bg-mgBlue-dark text-white p-3 sm:hidden flex justify-between items-center shadow-inner">
-        <span class="text-sm">나의 연봉</span>
-        <div class="relative">
-            <input type="number" id="globalSalaryMobile" value="50000000" class="w-32 rounded bg-white/20 border-white/30 text-white pl-2 pr-8 py-1 text-right focus:outline-none">
-            <span class="absolute right-2 top-1.5 text-xs text-white/80">원</span>
+    <!-- 모바일용 연봉 입력 및 제어 버튼 -->
+    <div class="bg-mgBlue-dark text-white p-3 sm:hidden flex flex-col gap-3 shadow-inner">
+        <div class="flex justify-between items-center">
+            <span class="text-sm">나의 연봉</span>
+            <div class="relative">
+                <input type="number" id="globalSalaryMobile" value="50000000" class="w-32 rounded bg-white/20 border-white/30 text-white pl-2 pr-8 py-1 text-right focus:outline-none">
+                <span class="absolute right-2 top-1.5 text-xs text-white/80">원</span>
+            </div>
+        </div>
+        <div class="flex gap-2 justify-end">
+             <button onclick="savePortfolio()" class="bg-white/20 hover:bg-white/30 px-3 py-1 text-xs rounded transition-colors flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                저장
+            </button>
+            <button onclick="document.getElementById('fileInputMobile').click()" class="bg-white/20 hover:bg-white/30 px-3 py-1 text-xs rounded transition-colors flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                불러오기
+            </button>
+            <input type="file" id="fileInputMobile" class="hidden" accept=".json" onchange="loadPortfolio(event)">
         </div>
     </div>
 
@@ -73,8 +98,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- 왼쪽: 대출 조건 입력 폼 -->
-            <!-- 모바일에서는 일반 흐름에 따르고, lg 화면 이상에서만 sticky 적용 -->
-            <div class="lg:col-span-5 space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit lg:sticky lg:top-24">
+            <!-- 모바일에서는 일반 흐름에 따르고, lg 화면 이상에서만 sticky 적용 확실히 적용 -->
+            <div class="lg:col-span-5 space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-4 h-max">
                 <h2 class="text-lg font-bold text-gray-900 border-b pb-2 flex justify-between items-center">
                     <span>새로운 대출 추가</span>
                     <button onclick="resetForm()" class="text-xs text-gray-500 hover:text-mgBlue underline">초기화</button>
@@ -243,15 +268,18 @@
                 </div>
 
                 <!-- 대출 목록 리스트 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-900">포트폴리오 목록</h3>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">포트폴리오 목록</h3>
+                    <div class="flex gap-2 items-center">
+                        <button onclick="clearPortfolio()" class="text-xs text-red-500 hover:text-red-700 underline px-2">전체 삭제</button>
                         <span class="text-sm bg-blue-50 text-mgBlue px-3 py-1 rounded-full font-medium" id="loanCountBadge">총 0건</span>
                     </div>
-                    
-                    <div id="loanListContainer" class="space-y-3 max-h-80 overflow-y-auto pr-2">
-                        <!-- 목록이 비어있을 때 -->
-                        <div id="emptyState" class="text-center py-10 text-gray-400 flex flex-col items-center">
+                </div>
+                
+                <div id="loanListContainer" class="space-y-4 max-h-80 overflow-y-auto pr-2">
+                    <!-- 목록이 비어있을 때 -->
+                    <div id="emptyState" class="text-center py-10 text-gray-400 flex flex-col items-center">
                             <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                             <p>왼쪽에서 대출 조건을 입력하고 추가해주세요.</p>
                         </div>
@@ -583,6 +611,16 @@
             portfolio = portfolio.filter(l => l.id !== id);
             updateDashboard();
         };
+        
+        // 포트폴리오 전체 삭제 기능 추가
+        window.clearPortfolio = () => {
+            if (portfolio.length === 0) return;
+            if (confirm("포트폴리오 목록을 모두 삭제하시겠습니까?")) {
+                portfolio = [];
+                loanCounter = 0;
+                updateDashboard();
+            }
+        };
 
         window.resetForm = () => {
             elType.value = 'credit';
@@ -809,6 +847,115 @@
                 btnTable.classList.add(...activeClass); btnTable.classList.remove(...inactiveClass);
                 btnChart.classList.remove(...activeClass); btnChart.classList.add(...inactiveClass);
             }
+        };
+
+        // 포트폴리오 저장 및 불러오기 관련 함수
+        window.savePortfolio = () => {
+            if (portfolio.length === 0) {
+                alert("저장할 대출 포트폴리오가 없습니다.");
+                return;
+            }
+
+            // 저장할 데이터 객체 구성
+            const dataToSave = {
+                salary: globalSalary,
+                loans: portfolio.map(loan => ({
+                    // 스케줄 데이터 등 계산된 값은 제외하고 핵심 입력 데이터만 저장하여 용량을 줄임
+                    type: loan.type,
+                    principal: loan.principal,
+                    term: loan.term,
+                    rate: loan.rate,
+                    grace: loan.grace,
+                    repayType: loan.repayType,
+                    collateralVal: loan.collateralVal
+                }))
+            };
+
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            // 날짜 기반 파일명 생성
+            const date = new Date();
+            const dateString = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `대출포트폴리오_${dateString}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // 정리
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        };
+
+        window.loadPortfolio = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const loadedData = JSON.parse(e.target.result);
+                    
+                    // 데이터 유효성 기본 검사
+                    if (!loadedData.loans || !Array.isArray(loadedData.loans)) {
+                        throw new Error("잘못된 파일 형식입니다.");
+                    }
+
+                    // 연봉 업데이트
+                    if (loadedData.salary) {
+                        globalSalary = loadedData.salary;
+                        elSalary.value = globalSalary;
+                        elSalaryMobile.value = globalSalary;
+                    }
+
+                    // 기존 포트폴리오 초기화
+                    portfolio = [];
+                    loanCounter = 0;
+
+                    // 대출 데이터 재생성 (스케줄 다시 계산)
+                    loadedData.loans.forEach(loanData => {
+                        const calcData = generateSchedule(
+                            loanData.principal, 
+                            loanData.term, 
+                            loanData.rate, 
+                            loanData.grace, 
+                            loanData.repayType
+                        );
+                        
+                        const newLoan = {
+                            id: loanCounter++,
+                            type: loanData.type,
+                            typeName: getTypeName(loanData.type),
+                            principal: loanData.principal,
+                            term: loanData.term,
+                            rate: loanData.rate,
+                            grace: loanData.grace,
+                            repayType: loanData.repayType,
+                            repayTypeName: getRepayTypeName(loanData.repayType),
+                            collateralVal: loanData.collateralVal || 0,
+                            ...calcData
+                        };
+                        portfolio.push(newLoan);
+                    });
+
+                    updateDashboard();
+                    alert("포트폴리오를 성공적으로 불러왔습니다.");
+                    
+                } catch (error) {
+                    console.error("파일 로드 중 오류 발생:", error);
+                    alert("파일을 읽는 중 오류가 발생했습니다. 올바른 포트폴리오 파일인지 확인해주세요.");
+                }
+                
+                // input file 초기화하여 같은 파일을 다시 선택할 수 있게 함
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
         };
 
         // 초기화
