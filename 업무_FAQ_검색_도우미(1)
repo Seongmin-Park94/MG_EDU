@@ -182,6 +182,25 @@
     line-height: 1.7;
   }
 
+
+  .engagement {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .engagement-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .like-btn { border:1px solid var(--line); background:#fff; color:#46515d; border-radius:999px; padding:8px 12px; font-size:13px; font-weight:700; cursor:pointer; }
+  .like-btn.liked { background:var(--accent-soft); border-color:#9eb8d2; color:#244d75; }
+  .comments { margin-top:14px; }
+  .comment-title { margin:0 0 8px; color:var(--muted); font-size:13px; font-weight:700; }
+  .comment-form { display:flex; gap:8px; }
+  .comment-input { flex:1; min-width:0; min-height:42px; max-height:120px; resize:vertical; border:1px solid #cfd6df; border-radius:9px; padding:10px 12px; font:inherit; font-size:13px; outline:none; }
+  .comment-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,93,140,.10); }
+  .comment-submit { align-self:flex-start; min-height:42px; border:1px solid var(--accent); border-radius:9px; padding:0 13px; background:#fff; color:var(--accent); font-weight:700; cursor:pointer; }
+  .comment-list { display:grid; gap:7px; margin-top:10px; }
+  .comment-item { background:#f7f9fb; border:1px solid #e2e7ed; border-radius:9px; padding:9px 11px; color:#46515d; font-size:13px; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .comment-empty { margin-top:9px; color:var(--muted); font-size:12px; }
+
   mark {
     background: var(--highlight);
     color: inherit;
@@ -212,6 +231,8 @@
     .all-btn {
       width: 100%;
     }
+    .comment-form { flex-direction: column; }
+    .comment-submit { width: 100%; }
   }
 </style>
 </head>
@@ -262,6 +283,7 @@
   const showAllBtn = document.getElementById('showAllBtn');
 
   let activeCategory = '전체';
+  const faqState = new Map(faqData.map((item, index) => [String(index), { liked: false, likes: 0, comments: [] }]));
 
   function escapeHtml(value) {
     return String(value)
@@ -312,14 +334,69 @@
 
     const rawKeyword = searchInput.value.trim();
 
-    results.innerHTML = filtered.map(item => `
-      <article class="faq-card">
-        <div class="category">${highlight(item.category, rawKeyword)}</div>
-        <h2 class="question">${highlight(item.question, rawKeyword)}</h2>
-        <p class="answer">${highlight(item.answer_seed, rawKeyword)}</p>
-      </article>
-    `).join('');
+    results.innerHTML = filtered.map(item => {
+      const faqIndex = faqData.indexOf(item);
+      const key = String(faqIndex);
+      const state = faqState.get(key);
+      const commentsHtml = state.comments.length
+        ? state.comments.map(comment => `<div class="comment-item">${escapeHtml(comment)}</div>`).join('')
+        : '<div class="comment-empty">아직 등록된 댓글이 없습니다.</div>';
+      return `
+        <article class="faq-card" data-faq-key="${key}">
+          <div class="category">${highlight(item.category, rawKeyword)}</div>
+          <h2 class="question">${highlight(item.question, rawKeyword)}</h2>
+          <p class="answer">${highlight(item.answer_seed, rawKeyword)}</p>
+          <div class="engagement">
+            <div class="engagement-row">
+              <button class="like-btn ${state.liked ? 'liked' : ''}" type="button" data-action="like" aria-pressed="${state.liked}">👍 좋아요 <span>${state.likes}</span></button>
+            </div>
+            <div class="comments">
+              <p class="comment-title">댓글 ${state.comments.length}개</p>
+              <div class="comment-form">
+                <textarea class="comment-input" rows="1" maxlength="300" placeholder="댓글을 입력하세요." aria-label="댓글 입력"></textarea>
+                <button class="comment-submit" type="button" data-action="comment">등록</button>
+              </div>
+              <div class="comment-list">${commentsHtml}</div>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
   }
+
+
+  results.addEventListener('click', event => {
+    const card = event.target.closest('.faq-card');
+    if (!card) return;
+    const key = card.dataset.faqKey;
+    const state = faqState.get(key);
+    if (!state) return;
+    const actionButton = event.target.closest('[data-action]');
+    if (!actionButton) return;
+    if (actionButton.dataset.action === 'like') {
+      state.liked = !state.liked;
+      state.likes = state.liked ? 1 : 0;
+      render();
+      return;
+    }
+    if (actionButton.dataset.action === 'comment') {
+      const input = card.querySelector('.comment-input');
+      const value = input.value.trim();
+      if (!value) { input.focus(); return; }
+      state.comments.push(value);
+      render();
+    }
+  });
+
+  results.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    const input = event.target.closest('.comment-input');
+    if (!input) return;
+    event.preventDefault();
+    const card = input.closest('.faq-card');
+    const submit = card?.querySelector('[data-action="comment"]');
+    submit?.click();
+  });
 
   searchInput.addEventListener('input', render);
 
